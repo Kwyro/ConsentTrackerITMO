@@ -1,6 +1,6 @@
 import requests
 
-def getCodes() -> dict[str, int]:
+def getCode(programCode: str) -> int:
     """По коду программы получает ID, который требуется для выполнения API-запросов
 
     Returns:
@@ -22,4 +22,4 @@ def getCodes() -> dict[str, int]:
 
         programs[code] = id
 
-    return programs
+    return programs[programCode]
