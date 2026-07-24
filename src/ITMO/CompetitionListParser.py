@@ -4,12 +4,43 @@ from requests import Response
 from bs4 import BeautifulSoup
 import json
 
-def getStudentList(programId: int) -> list:
-    """Получает списко студентов, в котором 
+from ITMO.dto.Student import Student
+from ITMO.CodesParser import getCode
+
+def getStudentList(programCode: str) -> list[Student]:
+    """Получение списка студентов ИТМО
+
+    Args:
+        programId (int): ID программы, который нужен для IP-запроса
+
+    Returns:
+        list[Student]: массив с ID заявлений студентов и их рекомендацией 
     """
 
+    programId: int = getCode(programCode)
+    URL: str = f"https://abit.itmo.ru/_next/data/{getBuildId()}/ru/ranking/bachelor/budget/{programId}.json?degree=bachelor&financing=budget&id={programId}" 
+
+    response: Response = requests.get(url=URL)
+
+    # Получение сырого списка студентов
+    pageProps = response.json()["pageProps"]
+    programList = pageProps["programList"]
+
+    generalCompetition = programList["without_entry_tests"] + programList["general_competition"]
+
+    students: list[Student] = list()
+
+    for student in generalCompetition:
+        id = student["sspvo_id"]
+        recommendation = student["status"]
+        isSendConsent = student["is_send_agreement"]
+
+        students.append(Student(id, recommendation, isSendConsent))
+
+    return students
+
 def getBuildId() -> str:
-    """Получает BuildId, который нужен, чтобы делать API-запросы для получения списков
+    """Возвращает BuildId, который нужен, чтобы делать API-запросы для получения списков
 
     Returns:
         str: BuildId NextJS
@@ -19,9 +50,9 @@ def getBuildId() -> str:
     response: Response = requests.get(URL)
     html: str = response.text
 
-    soup = BeautifulSoup(html, "html.parser")
+    soup: BeautifulSoup = BeautifulSoup(html, "html.parser")
 
-    data = json.loads(soup.find("script", id="__NEXT_DATA__").string)
-    build_id = data["buildId"]
+    data: dict = json.loads(soup.find("script", id="__NEXT_DATA__").string)
+    build_id: str = data["buildId"]
 
     return build_id
