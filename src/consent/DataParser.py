@@ -1,19 +1,64 @@
 import requests
 from requests import Response
 
-def parse(studentID: int) -> list[dict]:
-    """ Парсит данные студента по ID его заявления
+def parse(token: str, studentID: int) -> list[dict]:
+    """Парсит данные студента по ID его заявления.
 
     Args:
-        studentID (int): ID заявления
-        
+        studentID (int): ID заявления.
+
     Returns:
-        list[dict]: массив, в котором указаны все ВУЗы с направленями
+        list[dict]: Массив направлений.
     """
 
-    URL: str = "https://www.postupashkin.ru/priem-2026/forecast?app=" + str(studentID)
+    URL: str = "https://vuzstat.ru/api/applicant-overview"
 
-    response: Response = requests.get(url=URL)
-    positions = response.json()["positions"]
+    headers: dict[str, str] = {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:152.0) Gecko/20100101 Firefox/152.0",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Authorization": f"Bearer {token}",
+        "Referer": "https://vuzstat.ru/applicants/1214121",
+    } 
 
-    return positions
+    params: dict[str, int] = {
+        "user_id": studentID
+    }
+
+    response: Response = requests.get(url=URL, headers=headers, params=params)
+
+    return response.json()["applications"]
+
+def getToken(email: str, password: str) -> str:
+    """Получает JWT-токен, чтобы подавать API-запросы
+
+    Args:
+        email (str): Почта, на которую зарегестрирован аккаунт в ВУЗСтат
+        password (str): Пароль от аккаунта
+
+    Returns:
+        str: JWT-токен
+    """
+
+    url = "https://vuzstat.ru/api/auth/login"
+
+    headers: dict[str, str] = {
+        "User-Agent": "Mozilla/5.0",
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+        "Origin": "https://vuzstat.ru",
+        "Referer": "https://vuzstat.ru/login",
+    }
+
+    payload: dict[str, str] = {
+        "email": email,
+        "password": password,
+    }
+
+    response: Response = requests.post(
+        url,
+        headers=headers,
+        json=payload,  
+    )
+
+    return response.json()["token"]
