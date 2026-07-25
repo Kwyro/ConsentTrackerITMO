@@ -11,7 +11,7 @@ def getStudentList(programCode: str) -> list[Student]:
     """Получение списка студентов ИТМО
 
     Args:
-        programId (int): ID программы, который нужен для IP-запроса
+        programCode (str): код программы
 
     Returns:
         list[Student]: массив с ID заявлений студентов и их рекомендацией 
