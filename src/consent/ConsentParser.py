@@ -13,7 +13,7 @@ def processing(programs: list[dict]) -> dict[str, bool]:
     universities: dict[str, bool] = dict()
 
     for program in programs:
-        name: str = program["short_name"]
+        name: str = program["university"]
         consent: bool = True if program["consent"] == "ONLINE" else False
         
         universities[name] = consent
