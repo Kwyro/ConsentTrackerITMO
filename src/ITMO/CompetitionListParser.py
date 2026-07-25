@@ -26,7 +26,7 @@ def getStudentList(programCode: str) -> list[Student]:
     pageProps = response.json()["pageProps"]
     programList = pageProps["programList"]
 
-    generalCompetition = programList["without_entry_tests"] + programList["general_competition"]
+    generalCompetition = programList["general_competition"]
 
     students: list[Student] = list()
 
